@@ -6,6 +6,7 @@ public class Channel {
         this.probability = probability;
     }
 
+    //Siuncia zinute kanalu ir gali padaryti klaidas ties kiekvienu skaitmenimi su tikimybe probability
     public int[] sendMessage(int[] message)
     {
         int[] errors = new int[message.length];

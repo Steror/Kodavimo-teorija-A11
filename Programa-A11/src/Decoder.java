@@ -1,8 +1,10 @@
+//import java.util.;
+
 import java.util.*;
 
 public class Decoder {
     private final int[][] matrix_G; //Generuojanti matrica
-    private final int[][] matrix_H; //Kontrolinė matrica
+    private final int[][] matrix_H; //Kontroline matrica
     private final HashMap<String, Integer> syndromeWeightMap;
 
     public Decoder(final int[][] matrix_G)
@@ -10,9 +12,9 @@ public class Decoder {
         this.matrix_G = matrix_G;
         int rows = matrix_G.length;
         int columns = matrix_G[0].length;
-        //Sudaro kontrolinę matricą
+        //Sudaro kontroline matrica
         this.matrix_H = new int[columns - rows][columns];
-        //Perrašoma dešinė matricos pusė į kairę kontrolinės pusę, iš eilutės į stulpelį
+        //Perrasoma desine matricos puse i kaire kontrolines puse, is eilutes i stulpeli
         for (int i=0; i<rows; i++)
         {
             for (int j=0; j<columns - rows; j++)
@@ -20,7 +22,7 @@ public class Decoder {
                 matrix_H[j][i] = matrix_G[i][j + rows];
             }
         }
-        //Sukuriama vienetinė matrica kairėje pusėje
+        //Sukuriama vienetine matrica kaireje puseje
         for (int i=rows; i<columns; i++)
         {
             for (int j=0; j<columns - rows; j++)
@@ -37,13 +39,13 @@ public class Decoder {
         }
 
         List<int[]> codeWords = new ArrayList<>();
-        //Suskaičiuoja visas galimas lyderių reikšmes 2^rows
+        //Suskaiciuoja visas galimas lyderiu reiksmes 2^rows
         int leaderCount = (int) Math.pow(2, rows);
         Encoder encoder = new Encoder(matrix_G);
         int[] array = new int[rows];
         for (int i=0; i<leaderCount; i++)
         {
-            //Paverčia skaičius į binarinį pavidalą
+            //Pavercia skaicius i binarini pavidala
             String bits = Integer.toBinaryString(i);
             String missingZeroes = String.join("", Collections.nCopies(rows - bits.length(), "0"));
             String fullString = missingZeroes + bits;
@@ -54,11 +56,11 @@ public class Decoder {
             codeWords.add(encoder.Encode(array));
         }
 
-        //Randa visas galimas skaičių kombinacijas
+        //Randa visas galimas skaiciu kombinacijas
         List<int[]> codeVariations = new ArrayList<>();
         int bound = (int) Math.pow(2, columns);
         for (int i = 0; i < bound; i++) {
-            //Paverčia skaičius į binarinį pavidalą
+            //Pavercia skaicius i binarini pavidala
             int[] array2 = new int[columns];
             String bits = Integer.toBinaryString(i);
             String missingZeroes = String.join("", Collections.nCopies(columns - bits.length(), "0"));
@@ -67,7 +69,7 @@ public class Decoder {
             {
                 array2[j] = Character.getNumericValue(fullString.charAt(j));
             }
-            //Išmeta codeWords panaudotus žodžius
+            //Ismeta codeWords panaudotus zodzius
             int mismatches = 0;
             for (int j=0; j<codeWords.size(); j++)
             {
@@ -81,13 +83,13 @@ public class Decoder {
         }
 
         List<int[]> cosetLeaders = new ArrayList<>();
-        //Prie klasės lyderių pridedam pirmą vektorių
+        //Prie klases lyderiu prideda pirma vektoriu
         cosetLeaders.add(codeWords.get(0));
         for (int i=0; i<Math.pow(2, columns - rows) - 1; i++)
         {
-            //Gauna standartinės lentelės eilutę
+            //Gauna standartines lenteles eilute
             List<int[]> cosetRow = new ArrayList<>();
-            //Suranda klasės lyderį su mažiausiu svoriu
+            //Suranda klases lyderi su maziausiu svoriu
             int minWeight = -1;
             int minWeightIndex = 0;
             for (int j=0; j<codeVariations.size(); j++)
@@ -107,20 +109,19 @@ public class Decoder {
             }
             int[] cosetLeader = codeVariations.get(minWeightIndex); //Lyderis
 
-            //Prideda klasės lyderį prie kiekvieno kodo žodžio
+            //Prideda klases lyderi prie kiekvieno kodo zodzio
             for (int j=0; j<codeWords.size(); j++)
             {
-                int[] codeWord = new int[columns];
+                int[] codeWord;
                 codeWord = codeWords.get(j).clone();
                 for (int k=0; k<codeWord.length; k++)
                 {
                     codeWord[k] = (codeWord[k] + cosetLeader[k]) % 2;
                 }
-                cosetRow.add(codeWord); //standartinės lentelės eilutė
+                cosetRow.add(codeWord); //Gauta  standartines lenteles eilute
             }
 
-            //cosetRow = codeWords;   //Gauta standartinė eilutė
-            //Iš visų galimų kombinacijų išima panaudotas standartinės lentelės eilutėje
+            //Is visu galimu kombinaciju isima panaudotas standartines lenteles eiluteje
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             for (int j = 0; j<cosetRow.size(); j++)
             {
@@ -134,18 +135,16 @@ public class Decoder {
                 }
             }
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //Prideda klasės lyderį prie lyderių sąrašo
+            //Prideda klases lyderi prie lyderiu saraso
             cosetLeaders.add(cosetRow.get(0));
         }
 
-        //Sudaro sindromų ir svorio Map
-        //Klasių lyderių transponuotus vektorius sudaugina su kontroline matrica, sandaugos rezultatą ir klasės lyderio svorį sudeda į Map
+        //Sudaro sindromu ir svorio Map
+        //Klasiu lyderiu transponuotus vektorius sudaugina su kontroline matrica, sandaugos rezultata ir klases lyderio svori sudeda i Map
         this.syndromeWeightMap = new HashMap<>();
-        System.out.print("\n");
         for (int i=0; i<cosetLeaders.size(); i++)
         {
             int weight = 0;
-            System.out.print(Arrays.toString(cosetLeaders.get(i)));
             for (int j=0; j<cosetLeaders.get(0).length; j++)
             {
                 if (cosetLeaders.get(i)[j] == 1)
@@ -153,12 +152,11 @@ public class Decoder {
                     weight++;
                 }
             }
-            System.out.println(" "+weight);
             this.syndromeWeightMap.put(Arrays.toString(MultiplyByVectorT(cosetLeaders.get(i))), weight);
         }
     }
 
-    //Sudaugina žinutę su H matrica ir gražina užkoduotą žinutę
+    //Sudaugina zinute su H matrica ir grazina uzkoduota zinute
     public int[] MultiplyByVectorT (int[] message)
     {
         int[] result = new int[matrix_H.length];
@@ -172,18 +170,16 @@ public class Decoder {
         return result;
     }
 
-    //Dekoduoja užkoduotą vektorių
+    //Dekoduoja uzkoduotą vektoriu
     public int[] Decode(int[] message)
     {
-        //Daugina transponuotą vektorių iš H matricos
+        //Daugina transponuota vektoriu is H matricos
         int[] syndromeV = MultiplyByVectorT(message);
 
-        //Randa atitinkamo sindromo svorį
-        //System.out.println(syndromeWeightMap);
-        //System.out.println(Arrays.toString(syndromeV));
+        //Randa atitinkamo sindromo svori
         int weight = this.syndromeWeightMap.get(Arrays.toString(syndromeV));
 
-        //Pradinė pozicija - pirmas bitas
+        //Pradine pozicija - pirmas bitas
         int position = 0;
         int lastWeight;
 
@@ -191,12 +187,12 @@ public class Decoder {
         while (weight != 0)
         {
             lastWeight = weight;
-            //Pakeičiam vektoriaus bitą
+            //Pakeicia vektoriaus bita
             message[position] = (message[position] + 1) % 2;
             int[] syndrome = MultiplyByVectorT(message);
             weight = this.syndromeWeightMap.get(Arrays.toString(syndrome));
 
-            //Jei svoris nesumažėjo, gražina pakeistą bitą atgal
+            //Jei svoris nesumazejo, grazina pakeista bita atgal
             if (weight >= lastWeight)
             {
                 message[position] = (message[position] + 1) % 2;
@@ -204,7 +200,7 @@ public class Decoder {
             }
             position++;
         }
-        //Gražina pirmus k bitus
+        //Grazina pirmus k bitus
         int[] decodedMessage = new int[matrix_G.length];
         for (int i=0; i<matrix_G.length; i++)
         {

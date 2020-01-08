@@ -6,7 +6,7 @@ public class Encoder {
         this.matrix_G = matrix_G;
     }
 
-    //Sudaugina žinutę su G matrica ir gražina užkoduotą žinutę
+    //Sudaugina zinute su G matrica ir grazina uzkoduota zinute
     public int[] Encode (int[] message)
     {
         int[] result = new int[matrix_G[0].length];
